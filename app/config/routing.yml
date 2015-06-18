@@ -1,0 +1,18 @@
+ibw_blog:
+    type: rest
+    resource: "@IbwBlogBundle/Resources/config/routing.yml"
+    prefix:   /api
+
+
+ibw_jobeet:
+    resource: "@IbwJobeetBundle/Resources/config/routing.yml"
+    prefix:   /
+
+
+# app/config/routing.yml
+NelmioApiDocBundle:
+    resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+    prefix:   /api/doc
+
+
+

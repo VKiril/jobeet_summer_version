@@ -1,0 +1,10 @@
+services:
+#    ibw_blog.example:
+#        class: Ibw\BlogBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]
+
+    ibw.blog_bundle.requestHelper:
+        class: Ibw\BlogBundle\Services\RequestHelper
+        arguments:
+             doctrine: "@doctrine.orm.entity_manager"
+             securityContext: "@security.context"
