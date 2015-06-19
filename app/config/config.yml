@@ -90,7 +90,8 @@ fos_rest:
 
 parameters:
     max_jobs_on_homepage: 10
-    site_url: "http://golf.dev"
+    max_jobs_on_category: 20
+    site_url: "http://jobeet.dev"
 
 
 # app/config/config.yml

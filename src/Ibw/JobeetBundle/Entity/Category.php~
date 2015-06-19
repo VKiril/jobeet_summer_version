@@ -2,6 +2,7 @@
 
 namespace Ibw\JobeetBundle\Entity;
 
+use Ibw\JobeetBundle\Utils\Jobeet as Jobeet;
 /**
  * Category
  */
@@ -11,6 +12,16 @@ class Category
      * @var integer
      */
     private $id;
+
+    /**
+     * @var string
+     */
+    private $active_jobs;
+
+    /**
+     * @var integer
+     */
+    private $more_jobs;
 
     /**
      * @var string
@@ -26,6 +37,12 @@ class Category
      * @var \Doctrine\Common\Collections\Collection
      */
     private $affiliates;
+
+    /**
+     * @var string
+     */
+    private $slug;
+
 
     /**
      * Constructor
@@ -142,4 +159,68 @@ class Category
     {
         return $this->getName() ? $this->getName() : "";
     }
+
+    /**
+     * @return mixed
+     */
+    public function getActiveJobs()
+    {
+        return $this->active_jobs;
+    }
+
+    /**
+     * @param mixed $active_jobs
+     */
+    public function setActiveJobs($active_jobs)
+    {
+        $this->active_jobs = $active_jobs;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMoreJobs()
+    {
+        return $this->more_jobs;
+    }
+
+    /**
+     * @param mixed $jobs
+     */
+    public function setMoreJobs($jobs)
+    {
+        $this->more_jobs = $jobs >=  0 ? $jobs : 0;
+    }
+
+
+    /**
+     * Set slug
+     *
+     * @param string $slug
+     *
+     * @return Category
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug ;
+    }
+    /**
+     * @ORM\PrePersist
+     */
+    public function setSlugValue()
+    {
+        // Add your code here
+    }
+
 }

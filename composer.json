@@ -24,7 +24,7 @@
         "nelmio/api-doc-bundle": "@stable",
         "jms/serializer": "@dev",
         "jms/serializer-bundle": "@dev",
-        "phpunit/phpunit": "3.7.*",
+        "phpunit/phpunit": "4.7.*",
         "liip/functional-test-bundle":"dev-master"
     },
     "require-dev": {

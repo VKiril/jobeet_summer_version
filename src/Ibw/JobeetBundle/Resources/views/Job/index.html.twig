@@ -7,22 +7,28 @@
 
 {% block content %}
 <div id="jobs">
-    <table class="jobs">
-        {% for entity in entities %}
-        <tr class="{{ cycle(['even', 'odd'], loop.index) }}">
-            <td class="location">{{ entity.location }}</td>
-            <td class="position">
-                <a href="{{ path('ibw_job_show', {
-                    'company': entity.company,
-                    'location': entity.location,
-                    'id': entity.id,
-                    'position': entity.position }) }}">
-                    {{ entity.position }}
-                </a>
-            </td>
-            <td class="company">{{ entity.company }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+
+    {% for category in categories %}
+        <div>
+            <div class="category">
+                <div class="feed">
+                    <a href="">Feed</a>
+                </div>
+                <h1>{{ category.name }}</h1>
+            </div>
+
+            {{ include ('IbwJobeetBundle:Job:list.html.twig', {'jobs': category.activejobs}) }}
+
+            <h1><a href="{{ path('IbwJobeetBundle_category', { 'slug': category.slug }) }}">{{ category.name }}</a></h1>
+
+            {% if category.morejobs %}
+                <div class="more_jobs">
+                    and <a href="{{ path('IbwJobeetBundle_category', { 'slug': category.slug }) }}">{{ category.morejobs }}</a>
+                    more...
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+
 </div>
 {% endblock %}

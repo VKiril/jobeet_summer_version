@@ -6,6 +6,10 @@ ibw_jobeet_homepage:
     path:     /hello/{name}
     defaults: { _controller: IbwJobeetBundle:Default:index }
 
+IbwJobeetBundle_category:
+    path:  /category/{slug}/{page}
+    defaults: { _controller: IbwJobeetBundle:Category:show, page:   1 }
+
 #IbwJobeetBundle_job:
 #        resource: "@IbwJobeetBundle/Resources/config/routing/job.yml"
 #        prefix:   /job

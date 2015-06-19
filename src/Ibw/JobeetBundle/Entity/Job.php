@@ -1,7 +1,8 @@
 <?php
 
 namespace Ibw\JobeetBundle\Entity;
-use Ibw\JobeetBundle\Utils\Jobeet as Jobeet;
+
+use Ibw\JobeetBundle\Utils\Jobeet as Jobeet ;
 
 /**
  * Job
