@@ -4,11 +4,14 @@
 namespace Ibw\JobeetBundle\Utils;
 
 
+
+/**
+ * // transliterate remained
+ */
 class Jobeet
 {
     static public function slugify($text)
     {
-        $flag = "//TRANSLIT";
         //delete first position space and last position spaces, the rest of all will be replaced with hyphen ("-")
         $buff = explode(" ", $text);
         $text = implode("-", $buff);
@@ -19,10 +22,10 @@ class Jobeet
         //$text = preg_replace('#[^\pLd]+#u', '-', $text);
 
         // transliterate
-        /*if (function_exists('iconv'))
+        if (function_exists('iconv'))
         {
-            $text = @iconv("utf-8", "us-ascii".$flag, $text);
-        }*/
+            $text = @iconv("utf-8", "us-ascii//TRANSLIT", $text);
+        }
 
         // trim and lowercase
         $text = strtolower(trim($text, '-'));
@@ -35,5 +38,30 @@ class Jobeet
         }
 
         return $text;
+
+        /*// replace non letter or digits by -
+        $text = preg_replace('#[^\pLd]+#u', '-', $text);
+
+        // trim
+        $text = trim($text, '-');
+
+        // transliterate
+        if (function_exists('iconv'))
+        {
+            $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+        }
+
+        // lowercase
+        $text = strtolower($text);
+
+        // remove unwanted characters
+        $text = preg_replace('#[^-w]+#', '', $text);
+
+        if (empty($text))
+        {
+            return 'n-a';
+        }
+
+        return $text;*/
     }
 }
