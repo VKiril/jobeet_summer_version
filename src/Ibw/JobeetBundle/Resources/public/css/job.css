@@ -45,6 +45,8 @@
 
 #job .logo
 {
+  /*max-height: 200px;*/
+  /*max-width: 300px;*/
   float: right;
   margin-bottom: 20px;
   margin-left: 20px;

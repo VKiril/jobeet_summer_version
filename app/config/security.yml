@@ -3,6 +3,7 @@
 security:
     # http://symfony.com/doc/current/book/security.html#encoding-the-user-s-password
     encoders:
+        Ibw\JobeetBundle\Entity\User: sha512
         Symfony\Component\Security\Core\User\User: plaintext
 
     # http://symfony.com/doc/current/book/security.html#hierarchical-roles
@@ -12,11 +13,14 @@ security:
 
     # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
     providers:
+        main:
+            entity: { class: Ibw\JobeetBundle\Entity\User, property: username }
+
         in_memory:
             memory:
                 users:
                     user:  { password: userpass, roles: [ 'ROLE_USER' ] }
-                    admin: { password: adminpass, roles: [ 'ROLE_ADMIN' ] }
+                    admin: { password: admin, roles: [ 'ROLE_ADMIN' ] }
 
     # the main part of the security, where you can set up firewalls
     # for specific sections of your app
@@ -29,6 +33,18 @@ security:
         demo_login:
             pattern:  ^/demo/secured/login$
             security: false
+
+        secured_area:
+            pattern:    ^/
+            anonymous: ~
+            form_login:
+                login_path:  /login
+                check_path:  /login_check
+                default_target_path: ibw_job
+
+            logout:
+                path:   /logout
+                target: /
 
         # secures part of the application
         demo_secured_area:
@@ -50,3 +66,4 @@ security:
     # http://symfony.com/doc/current/cookbook/security/access_control.html
     access_control:
         #- { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
+        - { path: ^/admin, roles: ROLE_ADMIN }

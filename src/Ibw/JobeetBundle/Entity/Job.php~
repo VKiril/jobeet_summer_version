@@ -1,7 +1,13 @@
 <?php
 
 namespace Ibw\JobeetBundle\Entity;
-use Ibw\JobeetBundle\Utils\Jobeet as Jobeet;
+
+use Doctrine\ORM\Mapping as ORM;
+use Ibw\JobeetBundle\Utils\Jobeet as Jobeet ;
+use Zend_Search_Lucene;
+use Zend_Search_Lucene_Document;
+use Zend_Search_Lucene_Field;
+
 
 /**
  * Job
@@ -92,6 +98,24 @@ class Job
      * @var \Ibw\JobeetBundle\Entity\Category
      */
     private $category;
+
+    public $file;
+
+    /**
+     * @return mixed
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * @param mixed $file
+     */
+    public function setFile($file)
+    {
+        $this->file = $file;
+    }
 
 
     /**
@@ -487,23 +511,6 @@ class Job
     {
         return $this->category;
     }
-    /**
-     * @ORMPrePersist
-     */
-    public function setCreatedAtValue()
-    {
-        if(!$this->getCreatedAt()) {
-            $this->created_at = new \DateTime();
-        }
-    }
-
-    /**
-     * @ORMPreUpdate
-     */
-    public function setUpdatedAtValue()
-    {
-        $this->updated_at = new \DateTime();
-    }
 
     public function getCompanySlug()
     {
@@ -520,6 +527,43 @@ class Job
         return Jobeet::slugify($this->getLocation());
     }
 
+    public static function getTypes()
+    {
+        return array('full-time' => 'Full time', 'part-time' => 'Part time', 'freelance' => 'Freelance');
+    }
+
+    public static function getTypeValues()
+    {
+        return array_keys(self::getTypes());
+    }
+
+    protected function getUploadDir()
+    {
+        return "uploads/jobs";
+    }
+
+    public function getUploadRootDir()
+    {
+        return __DIR__.'/../../../../web/'.$this->getUploadDir();
+    }
+
+    public function getWebPath()
+    {
+        return null === $this->logo ? null : $this->getUploadDir().'/'.$this->logo;
+    }
+
+    public function getAbsolutePath()
+    {
+        return null === $this->logo ? null : $this->getUploadRootDir().'/'.$this->logo;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updated_at = new \DateTime();
+    }
 
     /**
      * @ORM\PrePersist
@@ -530,5 +574,225 @@ class Job
             $now = $this->getCreatedAt() ? $this->getCreatedAt()->format('U') : time();
             $this->expires_at = new \DateTime(date('Y-m-d H:i:s', $now + 86400 * 30));
         }
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function preUpload()
+    {
+        if (null !== $this->file) {
+            $this->logo = uniqid().'.'.$this->file->guessExtension();
+        }
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function preUploads()
+    {
+        if (null !== $this->file) {
+            $this->logo = uniqid().'.'.$this->file->guessExtension();
+        }
+    }
+
+    /**
+     * @ORM\PostPersist
+     */
+    public function upload()
+    {
+        if (null === $this->file) {
+            return;
+        }
+
+        // If there is an error when moving the file, an exception will
+        // be automatically thrown by move(). This will properly prevent
+        // the entity from being persisted to the database on error
+        $this->file->move($this->getUploadRootDir(), $this->logo);
+
+        unset($this->file);
+    }
+
+    /**
+     * @ORM\PostUpdate
+     */
+    public function uploads()
+    {
+        if (null === $this->file) {
+            return;
+        }
+
+        // If there is an error when moving the file, an exception will
+        // be automatically thrown by move(). This will properly prevent
+        // the entity from being persisted to the database on error
+        $this->file->move($this->getUploadRootDir(), $this->logo);
+
+        unset($this->file);
+    }
+
+    /**
+     * @ORM\PostRemove
+     */
+    public function removeUpload()
+    {
+        if(file_exists($this->file)) {
+            if ($this->file = $this->getAbsolutePath()) {
+                unlink($this->file);
+            }
+        }
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if(!$this->getCreatedAt()) {
+            $this->created_at = new \DateTime();
+        }
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setTokenValue()
+    {
+        if(!$this->getToken()) {
+            $this->token = sha1($this->getEmail().rand(11111, 99999));
+        }
+    }
+
+    public function isExpired()
+    {
+        return $this->getDaysBeforeExpires() < 0;
+    }
+
+    public function expiresSoon()
+    {
+        return $this->getDaysBeforeExpires() < 5;
+    }
+
+    public function getDaysBeforeExpires()
+    {
+        return ceil(($this->getExpiresAt()->format('U') - time()) / 86400);
+    }
+
+    public function publish()
+    {
+        $this->setIsActivated(true);
+    }
+
+    public function extend()
+    {
+        if (!$this->expiresSoon())
+        {
+            return false;
+        }
+
+        $this->expires_at = new DateTime(date('Y-m-d H:i:s', time() + 86400 * 30));
+
+        return true;
+    }
+
+    public function asArray($host)
+    {
+        return array(
+            'category'     => $this->getCategory()->getName(),
+            'type'         => $this->getType(),
+            'company'      => $this->getCompany(),
+            'logo'         => $this->getLogo() ? 'http://' . $host . '/uploads/jobs/' . $this->getLogo() : null,
+            'url'          => $this->getUrl(),
+            'position'     => $this->getPosition(),
+            'location'     => $this->getLocation(),
+            'description'  => $this->getDescription(),
+            'how_to_apply' => $this->getHowToApply(),
+            'expires_at'   => $this->getCreatedAt()->format('Y-m-d H:i:s'),
+        );
+    }
+
+    static public function getLuceneIndexFile()
+    {
+        return __DIR__.'/../../../../web/data/job.index';
+    }
+
+    static public function getLuceneIndex()
+    {
+        if (file_exists($index = self::getLuceneIndexFile())) {
+            return Zend_Search_Lucene::open($index);
+        }
+
+        return Zend_Search_Lucene::create($index);
+    }
+
+
+
+    /**
+     * @ORM\PostPersist
+     */
+    public function updateLuceneIndex1()
+    {
+        $index = self::getLuceneIndex();
+
+        // remove existing entries
+        foreach ($index->find('pk:'.$this->getId()) as $hit)
+        {
+            $index->delete($hit->id);
+        }
+
+        // don't index expired and non-activated jobs
+        if ($this->isExpired() || !$this->getIsActivated())
+        {
+            return;
+        }
+
+        $doc = new Zend_Search_Lucene_Document();
+
+        // store job primary key to identify it in the search results
+        $doc->addField(Zend_Search_Lucene_Field::Keyword('pk', $this->getId()));
+
+        // index job fields
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('position', $this->getPosition(), 'utf-8'));
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('company', $this->getCompany(), 'utf-8'));
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('location', $this->getLocation(), 'utf-8'));
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('description', $this->getDescription(), 'utf-8'));
+
+        // add job to the index
+        $index->addDocument($doc);
+        $index->commit();
+    }
+
+    /**
+     * @ORM\PostUpdate
+     */
+    public function updateLuceneIndex2()
+    {
+        $index = self::getLuceneIndex();
+
+        // remove existing entries
+        foreach ($index->find('pk:'.$this->getId()) as $hit)
+        {
+            $index->delete($hit->id);
+        }
+
+        // don't index expired and non-activated jobs
+        if ($this->isExpired() || !$this->getIsActivated())
+        {
+            return;
+        }
+
+        $doc = new Zend_Search_Lucene_Document();
+
+        // store job primary key to identify it in the search results
+        $doc->addField(Zend_Search_Lucene_Field::Keyword('pk', $this->getId()));
+
+        // index job fields
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('position', $this->getPosition(), 'utf-8'));
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('company', $this->getCompany(), 'utf-8'));
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('location', $this->getLocation(), 'utf-8'));
+        $doc->addField(Zend_Search_Lucene_Field::UnStored('description', $this->getDescription(), 'utf-8'));
+
+        // add job to the index
+        $index->addDocument($doc);
+        $index->commit();
     }
 }

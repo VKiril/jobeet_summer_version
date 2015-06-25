@@ -3,6 +3,8 @@
 namespace Ibw\JobeetBundle\Entity;
 
 use Ibw\JobeetBundle\Utils\Jobeet as Jobeet;
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Category
  */

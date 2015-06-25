@@ -6,6 +6,10 @@
 {% endblock %}
 
 {% block content %}
+    {% if app.request.get('token') %}
+        {% include 'IbwJobeetBundle:Job:admin.html.twig' with {'job': entity} %}
+    {% endif %}
+
     <div id="job">
         <h1>{{ entity.company }}</h1>
         <h2>{{ entity.location }}</h2>
@@ -19,7 +23,8 @@
                 <a href="{{ entity.url }}">
                     {#<img src="/uploads/jobs/{{ entity.logo }}"
                          alt="{{ entity.company }} logo" />#}
-                   <img src="{{ asset('bundles/ibwjobeet/images/'~  entity.logo) }}">
+                   {#<img src="{{ asset('bundles/ibwjobeet/images/'~  entity.logo) }}">#}
+                   <img src="{{ asset('uploads/jobs/'~  entity.logo) }}">
                 </a>
             </div>
         {% endif %}
@@ -36,10 +41,5 @@
             <small>posted on {{ entity.createdat|date('m/d/Y') }}</small>
         </div>
 
-        <div style="padding: 20px 0">
-            <a href="{{ path('ibw_job_edit', { 'id': entity.id }) }}">
-                Edit
-            </a>
-        </div>
     </div>
 {% endblock %}

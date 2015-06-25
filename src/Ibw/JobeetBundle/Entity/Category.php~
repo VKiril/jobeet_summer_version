@@ -3,6 +3,8 @@
 namespace Ibw\JobeetBundle\Entity;
 
 use Ibw\JobeetBundle\Utils\Jobeet as Jobeet;
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Category
  */
@@ -220,7 +222,15 @@ class Category
      */
     public function setSlugValue()
     {
-        // Add your code here
+        $this->slug = Jobeet::slugify($this->getName());
     }
 
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function updateSlugValue()
+    {
+        // Add your code here
+    }
 }

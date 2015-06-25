@@ -1,14 +1,60 @@
 ibw_jobeet_ibw_job:
     resource: "@IbwJobeetBundle/Resources/config/routing/job.yml"
-    prefix:   /
+    prefix:   /{_locale}/
+    requirements:
+        _locale: en|fr
 
-ibw_jobeet_homepage:
-    path:     /hello/{name}
-    defaults: { _controller: IbwJobeetBundle:Default:index }
+IbwJobeetBundle_ibw_affiliate:
+    resource: "@IbwJobeetBundle/Resources/config/routing/affiliate.yml"
+    prefix:   /{_locale}/affiliate
+    requirements:
+        _locale: en|fr
+
+
+ibw_job:
+    path:     /{_locale}/
+    defaults: { _controller: "IbwJobeetBundle:Job:index" }
+    requirements:
+        _locale: en|fr
+
+ibw_job_nonlocalized:
+    pattern:  /
+    defaults: { _controller: "IbwJobeetBundle:Job:index" }
+
+#ibw_jobeet_homepage:
+#    path:     /hello/{name}
+#    defaults: { _controller: IbwJobeetBundle:Default:index }
 
 IbwJobeetBundle_category:
-    path:  /category/{slug}/{page}
+    path:  /{_locale}/category/{slug}/{page}
     defaults: { _controller: IbwJobeetBundle:Category:show, page:   1 }
+    requirements:
+        _locale: en|fr
+
+login:
+    pattern:   /login
+    defaults:  { _controller: IbwJobeetBundle:Default:login }
+
+login_check:
+    pattern:   /login_check
+
+logout:
+    pattern:   /logout
+
+IbwJobeetBundle_api:
+    pattern: /api/{token}/jobs.{_format}
+    defaults: {_controller: "IbwJobeetBundle:Api:list"}
+    requirements:
+        _format: xml|json|yaml
+
+send_mail:
+    path: /send-mail
+    defaults: { _controller: "IbwJobeetBundle:Default:sendMail"}
+
+
+IbwJobeetBundle_changeLanguage:
+    pattern: /change_language
+    defaults: { _controller: "IbwJobeetBundle:Default:changeLanguage" }
 
 #IbwJobeetBundle_job:
 #        resource: "@IbwJobeetBundle/Resources/config/routing/job.yml"

@@ -2,6 +2,9 @@
 
 namespace Ibw\JobeetBundle\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
+
 /**
  * Affiliate
  */
@@ -219,5 +222,36 @@ class Affiliate
     public function setCreatedAtValue()
     {
         $this->created_at = new \DateTime();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setTokenValue()
+    {
+        if(!$this->getToken()) {
+            $token = sha1($this->getEmail().rand(11111, 99999));
+            $this->token = $token;
+        }
+
+        return $this;
+    }
+
+    public function activate()
+    {
+        if(!$this->getIsActive()) {
+            $this->setIsActive(true);
+        }
+
+        return $this->is_active;
+    }
+
+    public function deactivate()
+    {
+        if($this->getIsActive()) {
+            $this->setIsActive(false);
+        }
+
+        return $this->is_active;
     }
 }
